@@ -1,0 +1,27 @@
+# .gitignore file
+# API keys and credentials
+.env
+config.py
+
+# Data files
+# *.csv
+# *.json
+# *.pkl
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/

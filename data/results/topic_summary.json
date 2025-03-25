@@ -1,0 +1,12 @@
+{
+    "iphone": {
+        "optimal_topics": 4,
+        "coherence_score": 0.6068280840432703,
+        "topic_count": 4
+    },
+    "galaxy": {
+        "optimal_topics": 2,
+        "coherence_score": 0.31893134614872914,
+        "topic_count": 2
+    }
+}

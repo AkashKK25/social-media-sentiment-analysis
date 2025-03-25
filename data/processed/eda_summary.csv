@@ -1,0 +1,5 @@
+,text_length,text_length,text_length,word_count,word_count,word_count,like_count,like_count,like_count,retweet_count,retweet_count,retweet_count,reply_count,reply_count,reply_count
+,mean,median,std,mean,median,std,mean,median,sum,mean,median,sum,mean,median,sum
+category,,,,,,,,,,,,,,,
+galaxy,80.66666666666667,81.0,8.225975119502047,7.2,7.0,1.320173148816905,88.2,79.0,1323,33.6,35.0,504,17.333333333333332,17.0,260
+iphone,122.0909090909091,89.0,72.28748104224827,10.136363636363637,8.0,6.673762960335044,33.97727272727273,0.0,1495,10.181818181818182,0.0,448,4.75,0.0,209
