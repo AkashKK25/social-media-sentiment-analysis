@@ -447,6 +447,14 @@ if filtered_df is not None and not filtered_df.empty:
                     st.plotly_chart(fig, use_container_width=True)
         
     with col2:
+
+# Replace your existing word cloud code with this more robust version
+        
+# Word cloud for selected categories
+
+
+
+
         st.subheader("Word Cloud")
         
         # Word cloud for selected categories
@@ -459,24 +467,61 @@ if filtered_df is not None and not filtered_df.empty:
                 # Combine all cleaned text
                 text = ' '.join(category_df['cleaned_text'].dropna())
                 
-                if text:
-                    # Generate wordcloud
-                    wordcloud = WordCloud(
-                        width=800, 
-                        height=400, 
-                        background_color='white',
-                        max_words=100,
-                        colormap='viridis',
-                        contour_width=1,
-                        contour_color='steelblue'
-                    ).generate(text)
-                    
-                    # Display the wordcloud
-                    fig, ax = plt.subplots(figsize=(10, 5))
-                    ax.imshow(wordcloud, interpolation='bilinear')
-                    ax.axis("off")
-                    st.pyplot(fig)
-    
+                if text and len(text) > 0:
+                    try:
+                        # Generate wordcloud with error handling
+                        wordcloud = WordCloud(
+                            width=800, 
+                            height=400, 
+                            background_color='white',
+                            max_words=100,
+                            colormap='viridis',
+                            contour_width=1,
+                            contour_color='steelblue',
+                            max_font_size=100,  # Limit font size
+                            random_state=42,     # For reproducibility
+                            regexp=r'\w[\w\']+'  # Only match words
+                        )
+                        
+                        # Try to generate the word cloud
+                        wordcloud.generate(text)
+                        
+                        # Display the wordcloud
+                        fig, ax = plt.subplots(figsize=(10, 5))
+                        ax.imshow(wordcloud, interpolation='bilinear')
+                        ax.axis("off")
+                        st.pyplot(fig)
+                        
+                    except Exception as e:
+                        st.warning(f"Could not generate word cloud visualization.")
+                        
+                        # Show top words as an alternative
+                        st.write("Top words in this category:")
+                        
+                        # Simple word frequency as fallback
+                        from collections import Counter
+                        import re
+                        
+                        # Simple tokenization and counting
+                        words = re.findall(r'\b\w+\b', text.lower())
+                        word_counts = Counter(words).most_common(20)
+                        
+                        # Convert to DataFrame for display
+                        word_df = pd.DataFrame(word_counts, columns=['Word', 'Count'])
+                        
+                        # Create a bar chart
+                        fig = px.bar(
+                            word_df, 
+                            x='Count', 
+                            y='Word',
+                            orientation='h',
+                            title=f'Top Words for {selected_category}',
+                            height=400
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Not enough text data to generate a word cloud for this category.")
+
     # Topic analysis
     if topic_summary and selected_categories:
         st.header("📚 Topic Analysis")
