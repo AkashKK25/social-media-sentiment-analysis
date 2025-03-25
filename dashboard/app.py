@@ -1,3 +1,18 @@
+import os
+import sys
+
+# Get the absolute path of the current file
+dashboard_dir = os.path.dirname(os.path.abspath(__file__))
+# Get the parent directory
+project_dir = os.path.dirname(dashboard_dir)
+# Add the project directory to the Python path
+sys.path.append(project_dir)
+
+# Now update your data paths to be relative to the project directory
+data_path = os.path.join(project_dir, 'data', 'results')
+model_path = os.path.join(project_dir, 'models')
+
+
 import streamlit as st
 import pandas as pd
 import numpy as np
