@@ -29,6 +29,41 @@ st.set_page_config(
 data_path = os.path.join('..', 'data', 'results')
 model_path = os.path.join('..', 'models')
 
+# At the top of app.py
+import matplotlib.font_manager as fm
+
+# Define a fallback font path
+default_font_path = os.path.join(os.path.dirname(__file__), 'assets', 'DejaVuSans.ttf')
+
+# Create assets directory if it doesn't exist
+os.makedirs(os.path.join(os.path.dirname(__file__), 'assets'), exist_ok=True)
+
+# Check if font exists, download if not
+if not os.path.exists(default_font_path):
+    try:
+        import requests
+        font_url = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
+        response = requests.get(font_url)
+        with open(default_font_path, 'wb') as f:
+            f.write(response.content)
+        st.sidebar.success("Downloaded fallback font")
+    except Exception as e:
+        st.sidebar.warning("Could not download fallback font")
+
+# Use this font in your WordCloud
+# ...
+wordcloud = WordCloud(
+    width=800,
+    height=400,
+    background_color='white',
+    max_words=100,
+    colormap='viridis',
+    contour_width=1,
+    contour_color='steelblue',
+    font_path=default_font_path if os.path.exists(default_font_path) else None
+)
+
+
 # Define a function to get data path with flexible fallbacks
 def get_data_path():
     """Find the correct path to data files with multiple fallbacks"""
