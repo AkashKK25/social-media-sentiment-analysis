@@ -1,30 +1,19 @@
 import os
 import sys
-
-# Get the absolute path of the current file
-dashboard_dir = os.path.dirname(os.path.abspath(__file__))
-# Get the parent directory
-project_dir = os.path.dirname(dashboard_dir)
-# Add the project directory to the Python path
-sys.path.append(project_dir)
-
-# Now update your data paths to be relative to the project directory
-data_path = os.path.join(project_dir, 'data', 'results')
-model_path = os.path.join(project_dir, 'models')
-
-import streamlit as st
+import json
 import pandas as pd
 import numpy as np
+import base64
+from datetime import datetime, timedelta
+
+import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from wordcloud import WordCloud
-import json
 import glob
-import os
-import sys
 # Add project root to Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -40,58 +29,255 @@ st.set_page_config(
 data_path = os.path.join('..', 'data', 'results')
 model_path = os.path.join('..', 'models')
 
+# Define a function to get data path with flexible fallbacks
+def get_data_path():
+    """Find the correct path to data files with multiple fallbacks"""
+    possible_paths = [
+        os.path.join('..', 'data', 'results'),  # Original relative path
+        os.path.join('data', 'results'),        # Direct from project root
+        os.path.join('.', 'data')               # Data directly in dashboard folder
+    ]
+    
+    # Try each path
+    for path in possible_paths:
+        if os.path.exists(path):
+            st.sidebar.success(f"Found data at: {path}")
+            return path
+    
+    # If no path works, create and use a local data directory
+    os.makedirs(os.path.join('.', 'data'), exist_ok=True)
+    st.sidebar.warning("Using local data directory")
+    return os.path.join('.', 'data')
+
+# Create a function to generate sample data
+def generate_sample_data():
+    """Generate sample data when no files are found"""
+    # Create sample date range
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=7)
+    dates = pd.date_range(start=start_date, end=end_date, freq='D')
+    
+    # Categories
+    categories = ['iphone', 'galaxy']
+    
+    # Sentiments
+    sentiments = ['positive', 'negative', 'neutral']
+    
+    # Generate sample tweets
+    sample_data = []
+    
+    # Create tweet ID counter
+    id_counter = int(datetime.now().timestamp() * 1000)
+    
+    # Sample tweets for each category and sentiment
+    for category in categories:
+        for sentiment in sentiments:
+            # Create 5-10 tweets per category/sentiment combination
+            for _ in range(np.random.randint(5, 11)):
+                tweet_date = np.random.choice(dates)
+                
+                # Sample text based on sentiment and category
+                if category == 'iphone':
+                    if sentiment == 'positive':
+                        text = np.random.choice([
+                            "Love my new iPhone! The camera is amazing.",
+                            "iPhone's interface is so intuitive and smooth.",
+                            "Battery life on this iPhone is fantastic!",
+                            "Just upgraded to the new iPhone and it's worth every penny.",
+                            "iPhone's build quality is exceptional."
+                        ])
+                    elif sentiment == 'negative':
+                        text = np.random.choice([
+                            "iPhone prices are getting ridiculous.",
+                            "Having issues with my iPhone battery draining too fast.",
+                            "Not impressed with the iPhone camera in low light.",
+                            "iPhone updates keep making my phone slower.",
+                            "The notch on iPhone is still annoying."
+                        ])
+                    else:  # neutral
+                        text = np.random.choice([
+                            "Comparing iPhone models for my next purchase.",
+                            "iPhone has some new features in the latest update.",
+                            "Looking at iPhone cases online.",
+                            "iPhone comes in several colors this year.",
+                            "The iPhone weighs about 173 grams."
+                        ])
+                else:  # galaxy
+                    if sentiment == 'positive':
+                        text = np.random.choice([
+                            "The Galaxy display is stunning!",
+                            "Love the customization options on my Galaxy.",
+                            "Galaxy camera takes amazing wide-angle shots.",
+                            "Samsung's build quality has improved so much.",
+                            "The Galaxy S Pen is a game changer for me."
+                        ])
+                    elif sentiment == 'negative':
+                        text = np.random.choice([
+                            "Galaxy has too much bloatware.",
+                            "Battery life on my Galaxy is disappointing.",
+                            "My Galaxy overheats during gaming.",
+                            "The curved screen causes accidental touches.",
+                            "Samsung updates are too slow."
+                        ])
+                    else:  # neutral
+                        text = np.random.choice([
+                            "The Galaxy comes with different RAM options.",
+                            "Galaxy phones use Android OS.",
+                            "Looking at Galaxy accessories online.",
+                            "Samsung announced new Galaxy colors.",
+                            "The Galaxy weighs about 195 grams."
+                        ])
+                
+                # Generate random metrics
+                like_count = np.random.randint(0, 100)
+                retweet_count = np.random.randint(0, 50)
+                reply_count = np.random.randint(0, 30)
+                
+                # Create sample tweet
+                sample_data.append({
+                    'id': id_counter,
+                    'text': text,
+                    'cleaned_text': text.lower().replace('!', '').replace('.', ''),
+                    'readable_text': text,
+                    'created_at': tweet_date,
+                    'date': tweet_date.date(),
+                    'hour': tweet_date.hour,
+                    'day_of_week': tweet_date.day_name(),
+                    'category': category,
+                    'vader_sentiment': sentiment,
+                    'vader_compound': 0.8 if sentiment == 'positive' else (-0.8 if sentiment == 'negative' else 0.1),
+                    'vader_positive': 0.8 if sentiment == 'positive' else 0.1,
+                    'vader_negative': 0.8 if sentiment == 'negative' else 0.1,
+                    'vader_neutral': 0.8 if sentiment == 'neutral' else 0.1,
+                    'textblob_sentiment': sentiment,
+                    'textblob_polarity': 0.8 if sentiment == 'positive' else (-0.8 if sentiment == 'negative' else 0.1),
+                    'textblob_subjectivity': np.random.uniform(0.3, 0.7),
+                    'like_count': like_count,
+                    'retweet_count': retweet_count,
+                    'reply_count': reply_count,
+                    'source': np.random.choice(['Twitter for iPhone', 'Twitter for Web', 'Twitter for Android']),
+                    'text_length': len(text),
+                    'word_count': len(text.split())
+                })
+                
+                id_counter += 1
+    
+    return pd.DataFrame(sample_data)
+
 # Load data
 @st.cache_data
 def load_data():
-    # Find latest sentiment results
+    # Set data path using the flexible path finder
+    data_path = get_data_path()
+    
+    # Find sentiment result files
     sentiment_files = glob.glob(os.path.join(data_path, 'sentiment_results_*.csv'))
+    
     if not sentiment_files:
-        st.error("No sentiment data found. Please run the sentiment analysis script first.")
-        return None, None, None, None
-    
-    latest_sentiment_file = sorted(sentiment_files)[-1]
-    df = pd.read_csv(latest_sentiment_file)
-    
-    # Convert date columns to datetime
-    for col in ['created_at', 'date', 'processed_date']:
-        if col in df.columns:
-            df[col] = pd.to_datetime(df[col])
-    
-    # Load feature data if available
-    feature_file = os.path.join(data_path, 'tweets_with_features.csv')
-    if os.path.exists(feature_file):
-        df_features = pd.read_csv(feature_file)
+        st.warning("No sentiment data files found. Using sample data instead.")
+        df = generate_sample_data()
         
-        # Merge with main dataframe if needed
-        if 'id' in df_features.columns and 'id' in df.columns:
-            df = pd.merge(df, df_features[['id', 'key_phrases', 'total_feature_mentions'] + 
-                                        [col for col in df_features.columns if col.startswith('mentions_')]],
-                         on='id', how='left')
+        # Save sample data for future use
+        sample_file = os.path.join(get_data_path(), 'sentiment_results_sample.csv')
+        df.to_csv(sample_file, index=False)
+        
+        # Create empty structures for other data types
+        topic_summary = {
+            'iphone': {'optimal_topics': 2, 'coherence_score': 0.7, 'topic_count': 2},
+            'galaxy': {'optimal_topics': 2, 'coherence_score': 0.7, 'topic_count': 2}
+        }
+        
+        topic_terms = {
+            'iphone': {
+                '0': [{'term': 'camera', 'prob': 0.08}, {'term': 'quality', 'prob': 0.07}],
+                '1': [{'term': 'battery', 'prob': 0.08}, {'term': 'life', 'prob': 0.07}]
+            },
+            'galaxy': {
+                '0': [{'term': 'screen', 'prob': 0.08}, {'term': 'display', 'prob': 0.07}],
+                '1': [{'term': 'android', 'prob': 0.08}, {'term': 'samsung', 'prob': 0.07}]
+            }
+        }
+        
+        category_dfs = {
+            'iphone': df[df['category'] == 'iphone'],
+            'galaxy': df[df['category'] == 'galaxy']
+        }
+        
+        return df, topic_summary, topic_terms, category_dfs
     
-    # Load topic data
-    topic_summary_file = os.path.join(data_path, 'topic_summary.json')
-    if os.path.exists(topic_summary_file):
-        with open(topic_summary_file, 'r') as f:
-            topic_summary = json.load(f)
-    else:
-        topic_summary = {}
+    # Continue with your original loading code for when files are found
+    latest_sentiment_file = sorted(sentiment_files)[-1]
+    st.sidebar.info(f"Using data from: {os.path.basename(latest_sentiment_file)}")
     
-    # Load topic terms
-    topic_terms = {}
-    for category in df['category'].unique():
-        topic_terms_file = os.path.join(data_path, f'{category}_top_terms.json')
-        if os.path.exists(topic_terms_file):
-            with open(topic_terms_file, 'r') as f:
-                topic_terms[category] = json.load(f)
+    # Load the data and handle conversion errors
+    try:
+        df = pd.read_csv(latest_sentiment_file)
+        
+        # Convert date columns to datetime
+        for col in ['created_at', 'date', 'processed_date']:
+            if col in df.columns:
+                try:
+                    df[col] = pd.to_datetime(df[col], errors='coerce')
+                except:
+                    st.warning(f"Could not convert {col} to datetime. Using as-is.")
+        
+        # Load feature data if available
+        feature_file = os.path.join(data_path, 'tweets_with_features.csv')
+        if os.path.exists(feature_file):
+            df_features = pd.read_csv(feature_file)
+            
+            # Merge with main dataframe if needed
+            if 'id' in df_features.columns and 'id' in df.columns:
+                df = pd.merge(df, df_features[['id', 'key_phrases', 'total_feature_mentions'] + 
+                                            [col for col in df_features.columns if col.startswith('mentions_')]],
+                            on='id', how='left')
+
+        # Load topic data
+        topic_summary_file = os.path.join(data_path, 'topic_summary.json')
+        if os.path.exists(topic_summary_file):
+            with open(topic_summary_file, 'r') as f:
+                topic_summary = json.load(f)
+        else:
+            topic_summary = {}
+
+        
+        # Load topic terms
+        topic_terms = {}
+        for category in df['category'].unique():
+            topic_terms_file = os.path.join(data_path, f'{category}_top_terms.json')
+            if os.path.exists(topic_terms_file):
+                with open(topic_terms_file, 'r') as f:
+                    topic_terms[category] = json.load(f)
+        
+        # Load category-specific dataframes with topics
+        category_dfs = {}
+        for category in df['category'].unique():
+            category_file = os.path.join(data_path, f'{category}_with_topics.csv')
+            if os.path.exists(category_file):
+                category_dfs[category] = pd.read_csv(category_file)
+        
+        return df, topic_summary, topic_terms, category_dfs
     
-    # Load category-specific dataframes with topics
-    category_dfs = {}
-    for category in df['category'].unique():
-        category_file = os.path.join(data_path, f'{category}_with_topics.csv')
-        if os.path.exists(category_file):
-            category_dfs[category] = pd.read_csv(category_file)
-    
-    return df, topic_summary, topic_terms, category_dfs
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        st.info("Falling back to sample data...")
+        return generate_sample_data(), {}, {}, {}
+
+# Add a sidebar note about the data source
+st.sidebar.markdown("### Data Source")
+data_source = st.sidebar.radio(
+    "Select Data Source",
+    ["Loaded Data", "Generate New Sample Data"],
+    index=0
+)
+
+# Use the selection to determine data source
+if data_source == "Generate New Sample Data":
+    df, topic_summary, topic_terms, category_dfs = generate_sample_data(), {}, {}, {}
+    st.sidebar.success("Using freshly generated sample data")
+else:
+    df, topic_summary, topic_terms, category_dfs = load_data()
+
 
 # Load data
 df, topic_summary, topic_terms, category_dfs = load_data()
