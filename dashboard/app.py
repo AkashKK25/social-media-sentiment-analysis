@@ -12,7 +12,6 @@ sys.path.append(project_dir)
 data_path = os.path.join(project_dir, 'data', 'results')
 model_path = os.path.join(project_dir, 'models')
 
-
 import streamlit as st
 import pandas as pd
 import numpy as np
