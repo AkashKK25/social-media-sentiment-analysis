@@ -26,7 +26,7 @@ The interactive dashboard allows you to:
 
 ## Live Dashboard
 
-You can access the live dashboard at [https://your-app-url.streamlit.app](https://your-app-url.streamlit.app)
+You can access the live dashboard [here](https://your-app-url.streamlit.app)
 
 ## Technologies Used
 
