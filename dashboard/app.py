@@ -70,17 +70,13 @@ def safe_wordcloud(text, category_name):
         return
         
     try:
-        # Try generating a word cloud
+        # Try generating a word cloud with minimal options
         wordcloud = WordCloud(
-            width=800, 
-            height=400, 
+            width=600, 
+            height=300, 
             background_color='white',
-            max_words=100,
-            colormap='viridis',
-            contour_width=1,
-            contour_color='steelblue',
-            prefer_horizontal=0.9,  # Allow some vertical words
-            min_font_size=8
+            max_words=50,  # Reduced for simplicity
+            prefer_horizontal=1.0  # Only horizontal words
         ).generate(text)
         
         # Display the word cloud
@@ -90,13 +86,9 @@ def safe_wordcloud(text, category_name):
         st.pyplot(fig)
         
     except Exception as e:
-        st.warning("Could not generate word cloud - falling back to bar chart")
+        st.warning(f"Could not generate word cloud - falling back to bar chart")
         
         # Simple word frequency as fallback
-        from collections import Counter
-        import re
-        
-        # Simple tokenization and counting
         words = re.findall(r'\b\w+\b', text.lower())
         
         # Filter out very short words
@@ -120,7 +112,7 @@ def safe_wordcloud(text, category_name):
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("No significant words found in the text.")
-
+    
 # Define a function to get data path with flexible fallbacks
 def get_data_path():
     """Find the correct path to data files with multiple fallbacks"""
@@ -540,12 +532,29 @@ if filtered_df is not None and not filtered_df.empty:
         
     with col2:
 
-# Replace your existing word cloud code with this more robust version
-        
-# Word cloud for selected categories
 
+        # Word Cloud Section
+        st.subheader("Word Cloud")
 
-
+        # Word cloud for selected categories
+        if selected_categories:
+            selected_category = st.selectbox("Select Category for Word Cloud", options=selected_categories)
+            
+            category_df = filtered_df[filtered_df['category'] == selected_category]
+            
+            if not category_df.empty and 'cleaned_text' in category_df.columns:
+                # Combine all cleaned text
+                text = ' '.join(category_df['cleaned_text'].dropna())
+                
+                if text and len(text) > 0:
+                    # Call our safe word cloud function
+                    safe_wordcloud(text, selected_category)
+                else:
+                    st.info("Not enough text data to generate a word cloud for this category.")
+            else:
+                st.info("No data available for the selected category or missing text column.")
+        else:
+            st.info("Please select at least one category to view the word cloud.")
 
         st.subheader("Word Cloud")
         
