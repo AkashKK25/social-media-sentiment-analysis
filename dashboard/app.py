@@ -63,6 +63,63 @@ wordcloud = WordCloud(
     font_path=default_font_path if os.path.exists(default_font_path) else None
 )
 
+def safe_wordcloud(text, category_name):
+    """Safely generate a word cloud or fall back to alternative visualization"""
+    if not text or len(text) < 10:
+        st.info(f"Not enough text data for {category_name}")
+        return
+        
+    try:
+        # Try generating a word cloud
+        wordcloud = WordCloud(
+            width=800, 
+            height=400, 
+            background_color='white',
+            max_words=100,
+            colormap='viridis',
+            contour_width=1,
+            contour_color='steelblue',
+            prefer_horizontal=0.9,  # Allow some vertical words
+            min_font_size=8
+        ).generate(text)
+        
+        # Display the word cloud
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis("off")
+        st.pyplot(fig)
+        
+    except Exception as e:
+        st.warning("Could not generate word cloud - falling back to bar chart")
+        
+        # Simple word frequency as fallback
+        from collections import Counter
+        import re
+        
+        # Simple tokenization and counting
+        words = re.findall(r'\b\w+\b', text.lower())
+        
+        # Filter out very short words
+        words = [word for word in words if len(word) > 2]
+        
+        # Count and get top words
+        word_counts = Counter(words).most_common(20)
+        
+        # Display as bar chart
+        if word_counts:
+            word_df = pd.DataFrame(word_counts, columns=['Word', 'Count'])
+            fig = px.bar(
+                word_df, 
+                x='Count', 
+                y='Word',
+                orientation='h',
+                title=f'Top Words for {category_name}',
+                height=400
+            )
+            fig.update_layout(yaxis={'categoryorder': 'total ascending'})
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No significant words found in the text.")
 
 # Define a function to get data path with flexible fallbacks
 def get_data_path():
