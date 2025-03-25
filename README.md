@@ -157,6 +157,11 @@ social-media-sentiment-analysis/
 └── README.md           # Project documentation
 ```
 
+## Acknowledgements
+
+ - Manideep Palepu (for the help with Twitter API)
+ - [Twitter](X.com) for X API
+
 ## Author
 
 [Akash Kondaparthi](https://AkashKK25.github.io/Data-Portfolio) - [akashkondaparthi@gmail.com](mailto:akashkondaparthi@gmail.com)
