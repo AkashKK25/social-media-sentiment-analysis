@@ -26,7 +26,7 @@ The interactive dashboard allows you to:
 
 ## Live Dashboard
 
-You can access the live dashboard [here](https://your-app-url.streamlit.app)
+You can access the live dashboard [here](https://social-media-sentiment-analysis-az2kxeazreeqwqjizqixpl.streamlit.app/)
 
 ## Technologies Used
 
