@@ -532,30 +532,6 @@ if filtered_df is not None and not filtered_df.empty:
         
     with col2:
 
-
-        # Word Cloud Section
-        st.subheader("Word Cloud")
-
-        # Word cloud for selected categories
-        if selected_categories:
-            selected_category = st.selectbox("Select Category for Word Cloud", options=selected_categories)
-            
-            category_df = filtered_df[filtered_df['category'] == selected_category]
-            
-            if not category_df.empty and 'cleaned_text' in category_df.columns:
-                # Combine all cleaned text
-                text = ' '.join(category_df['cleaned_text'].dropna())
-                
-                if text and len(text) > 0:
-                    # Call our safe word cloud function
-                    safe_wordcloud(text, selected_category)
-                else:
-                    st.info("Not enough text data to generate a word cloud for this category.")
-            else:
-                st.info("No data available for the selected category or missing text column.")
-        else:
-            st.info("Please select at least one category to view the word cloud.")
-
         st.subheader("Word Cloud")
         
         # Word cloud for selected categories
