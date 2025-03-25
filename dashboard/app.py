@@ -532,11 +532,11 @@ if filtered_df is not None and not filtered_df.empty:
         
     with col2:
 
-        st.subheader("Word Cloud")
-        
-        # Word cloud for selected categories
+        st.subheader("Top Words")
+
+        # For selected categories
         if selected_categories:
-            selected_category = st.selectbox("Select Category for Word Cloud", options=selected_categories)
+            selected_category = st.selectbox("Select Category for Analysis", options=selected_categories)
             
             category_df = filtered_df[filtered_df['category'] == selected_category]
             
@@ -545,48 +545,19 @@ if filtered_df is not None and not filtered_df.empty:
                 text = ' '.join(category_df['cleaned_text'].dropna())
                 
                 if text and len(text) > 0:
-                    try:
-                        # Generate wordcloud with error handling
-                        wordcloud = WordCloud(
-                            width=800, 
-                            height=400, 
-                            background_color='white',
-                            max_words=100,
-                            colormap='viridis',
-                            contour_width=1,
-                            contour_color='steelblue',
-                            max_font_size=100,  # Limit font size
-                            random_state=42,     # For reproducibility
-                            regexp=r'\w[\w\']+'  # Only match words
-                        )
-                        
-                        # Try to generate the word cloud
-                        wordcloud.generate(text)
-                        
-                        # Display the wordcloud
-                        fig, ax = plt.subplots(figsize=(10, 5))
-                        ax.imshow(wordcloud, interpolation='bilinear')
-                        ax.axis("off")
-                        st.pyplot(fig)
-                        
-                    except Exception as e:
-                        st.warning(f"Could not generate word cloud visualization.")
-                        
-                        # Show top words as an alternative
-                        st.write("Top words in this category:")
-                        
-                        # Simple word frequency as fallback
-                        from collections import Counter
-                        import re
-                        
-                        # Simple tokenization and counting
-                        words = re.findall(r'\b\w+\b', text.lower())
-                        word_counts = Counter(words).most_common(20)
-                        
-                        # Convert to DataFrame for display
+                    # Simple word frequency analysis
+                    words = re.findall(r'\b\w+\b', text.lower())
+                    
+                    # Filter out very short words and common words
+                    stopwords = ['the', 'and', 'for', 'are', 'but', 'not', 'you', 'this', 'that', 'have', 'with']
+                    words = [word for word in words if len(word) > 2 and word not in stopwords]
+                    
+                    # Count and get top words
+                    word_counts = Counter(words).most_common(20)
+                    
+                    # Display as bar chart
+                    if word_counts:
                         word_df = pd.DataFrame(word_counts, columns=['Word', 'Count'])
-                        
-                        # Create a bar chart
                         fig = px.bar(
                             word_df, 
                             x='Count', 
@@ -595,9 +566,16 @@ if filtered_df is not None and not filtered_df.empty:
                             title=f'Top Words for {selected_category}',
                             height=400
                         )
+                        fig.update_layout(yaxis={'categoryorder': 'total ascending'})
                         st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.info("No significant words found in the text.")
                 else:
-                    st.info("Not enough text data to generate a word cloud for this category.")
+                    st.info("Not enough text data to analyze for this category.")
+            else:
+                st.info("No data available for the selected category or missing text column.")
+        else:
+            st.info("Please select at least one category to view word frequency analysis.")
 
     # Topic analysis
     if topic_summary and selected_categories:
