@@ -371,7 +371,7 @@ def main():
         combined_df = pd.concat([existing_df, new_tweets_df], ignore_index=True)
         
         # Remove duplicates based on tweet ID
-        combined_df = combined_df.drop_duplicates(subset='id', keep='first')
+        #combined_df = combined_df.drop_duplicates(subset='id', keep='first')
         
         print(f"Combined dataset now has {len(combined_df)} tweets (added {len(combined_df) - len(existing_df)} new unique tweets)")
     else:

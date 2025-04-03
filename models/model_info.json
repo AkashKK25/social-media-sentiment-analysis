@@ -1,39 +1,7 @@
 {
-    "model_path": "models\\sentiment_model_1742859531.pkl",
-    "vectorizer_path": "models\\vectorizer_1742859531.pkl",
-    "model_type": "svm",
-    "accuracy": 0.3333333333333333,
-    "classification_report": {
-        "negative": {
-            "precision": 0.2727272727272727,
-            "recall": 1.0,
-            "f1-score": 0.42857142857142855,
-            "support": 3.0
-        },
-        "neutral": {
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1-score": 0.0,
-            "support": 4.0
-        },
-        "positive": {
-            "precision": 1.0,
-            "recall": 0.2,
-            "f1-score": 0.3333333333333333,
-            "support": 5.0
-        },
-        "accuracy": 0.3333333333333333,
-        "macro avg": {
-            "precision": 0.42424242424242425,
-            "recall": 0.39999999999999997,
-            "f1-score": 0.25396825396825395,
-            "support": 12.0
-        },
-        "weighted avg": {
-            "precision": 0.48484848484848486,
-            "recall": 0.3333333333333333,
-            "f1-score": 0.24603174603174602,
-            "support": 12.0
-        }
-    }
+    "model_path": null,
+    "vectorizer_path": null,
+    "model_type": "rule_based_only",
+    "accuracy": null,
+    "note": "Not enough data for custom model training. Using VADER and TextBlob only."
 }
